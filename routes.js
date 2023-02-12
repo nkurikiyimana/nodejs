@@ -9,72 +9,14 @@ const Contact = require("./models/Contact");
 const Signup = require("./models/Signup");
 const login = require("./login");
 
-const router = express.Router();
-//comment
+const Comment = require("./models/comment");
+//const Like = require("./models/like");
+const routes = express();
 
-router.use(async (req, res, next) => {
-  try {
-    const token = req.header("Authorization").replace("Bearer ", "");
-    const decoded = jwt.verify(token, "remember");
-    const user = await Signup.findOne({ _id: decoded.id });
+const Joi = require("@hapi/joi");
 
-    req.user = user;
-    next();
-  } catch (error) {
-    res.status(401).json({ error: "Unauthorized" });
-  }
-});
-/*
-router.post("/comment/:id", async (req, res) => {
-  const com = new Com({
-    userid: req.user._id,
-    postid: req.params.id,
-    comment: req.body.comment,
-  });
-  await com.save();
-  res.send(com);
-}); 
-
-/*router.post("/comment/:id", async (req, res) => {
-  const adminid = req.id
-  console.log(adminid)
-  const com = new Com({
-    userid: req.body.userid,
-    postid: req.params.id,
-    comment: req.body.comment,
-  });
-  await com.save();
-  res.send(com);
-});*/
-
-//check comment
-/*
-router.post("/comment/:id", function(req, res, next) {
-  admin(req, res, next);
-}, async (req, res) => {
-  try {
-    const adminid = req.id
-    console.log(adminid)
-    
-    if (!req.body.comment) {
-      return res.status(400).send({ error: "Comment is required" });
-    }
-  
-    const com = new Com({
-      postid: req.params.id,
-      comment: req.body.comment,
-    });
-    await com.save();
-    res.send(com);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ error: "Could not save comment" });
-  }
-});*/
-
-
-// Get all posts
-router.use(async (req, res, next) => {
+//protect my end user
+routes.use(async (req, res, next) => {
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
     const decoded = jwt.verify(token, "remember");
@@ -87,32 +29,40 @@ router.use(async (req, res, next) => {
   }
 });
 
-router.get("/posts", async (req, res) => {
-  const posts = await Post.find();
-  res.send(posts);
+// Define the validation schema for a new post
+const postSchema = Joi.object({
+  title: Joi.string().required(),
+  image: Joi.string().required(),
+  content: Joi.string().required(),
 });
 
-router.post("/posts", async (req, res) => {
+routes.post("/posts", async (req, res) => {
+  const { error } = postSchema.validate(req.body);
+
+  if (error) {
+    res.status(400).send({ error: error.details[0].message });
+    return;
+  }
+
   const post = new Post({
     title: req.body.title,
     image: req.body.image,
     content: req.body.content,
-    user: req.user._id,
   });
   await post.save();
   res.send(post);
 });
+//acess token
 
-
-
-router.get("/posts",async (req, res) => {
+//Get all post
+routes.get("/posts", async (req, res) => {
   const posts = await Post.find();
   res.send(posts);
 });
 
-router.post("/posts", async (req, res) => {
-  const adminid = req.id
-  console.log(adminid)
+routes.post("/posts", async (req, res) => {
+  const adminid = req.id;
+  console.log(adminid);
   const post = new Post({
     title: req.body.title,
     image: req.body.image,
@@ -124,7 +74,7 @@ router.post("/posts", async (req, res) => {
 
 // grab individual post
 
-router.get("/posts/:id", async (req, res) => {
+routes.get("/posts/:id", async (req, res) => {
   try {
     const post = await Post.findOne({ _id: req.params.id });
     res.send(post);
@@ -134,7 +84,7 @@ router.get("/posts/:id", async (req, res) => {
   }
 });
 
-router.patch("/posts/:id", async (req, res) => {
+routes.patch("/posts/:id", async (req, res) => {
   try {
     const post = await Post.findOne({ _id: req.params.id });
 
@@ -158,7 +108,7 @@ router.patch("/posts/:id", async (req, res) => {
   }
 });
 
-router.delete("/posts/:id", async (req, res) => {
+routes.delete("/posts/:id", async (req, res) => {
   try {
     await Post.deleteOne({ _id: req.params.id });
     res.status(204).send();
@@ -168,39 +118,22 @@ router.delete("/posts/:id", async (req, res) => {
   }
 });
 
+// Define the validation schema for a new contact
 
-//contact
-const Joi = require("@hapi/joi");
-
-const contactSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  message: Joi.string().required(), 
+const contactSchema = Joi.object().keys({
+  name: Joi.string().min(3).required(),
+  email: Joi.string().email().min(5).required(),
+  message: Joi.string().min(10).required(),
 });
 
-router.post("/Contact", async (req, res) => {
+routes.post("/contact", async (req, res) => {
   const { error } = contactSchema.validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
 
-  const contact = new Contact({
-    name: req.body.name,
-    email: req.body.email,
-    message: req.body.message,
-  });
-  try {
-    await contact.save();
-    res.send(contact);
-  } catch (err) {
-    res.status(500).send(err.message);
+  if (error) {
+    res.status(400).send({ error: error.details[0].message });
+    return;
   }
-});
 
-router.get("/Contact", async (req, res) => {
-  const contact = await Contact.find();
-  res.send(contact);
-});
-
-router.post("/Contact", async (req, res) => {
   const contact = new Contact({
     name: req.body.name,
     email: req.body.email,
@@ -210,7 +143,24 @@ router.post("/Contact", async (req, res) => {
   res.send(contact);
 });
 
-router.get("/Contact/:id", async (req, res) => {
+//contact
+
+routes.get("/Contact", async (req, res) => {
+  const contact = await Contact.find();
+  res.send(contact);
+});
+
+routes.post("/Contact", async (req, res) => {
+  const contact = new Contact({
+    name: req.body.name,
+    email: req.body.email,
+    message: req.body.message,
+  });
+  await contact.save();
+  res.send(contact);
+});
+
+routes.get("/Contact/:id", async (req, res) => {
   try {
     const contact = await Contact.findOne({ _id: req.params.id });
     res.send(contact);
@@ -220,7 +170,7 @@ router.get("/Contact/:id", async (req, res) => {
   }
 });
 
-router.patch("/Contact/:id", async (req, res) => {
+routes.patch("/Contact/:id", async (req, res) => {
   try {
     const contact = await Contact.findOne({ _id: req.params.id });
 
@@ -244,7 +194,7 @@ router.patch("/Contact/:id", async (req, res) => {
   }
 });
 
-router.delete("/Contact/:id", async (req, res) => {
+routes.delete("/Contact/:id", async (req, res) => {
   try {
     await Contact.deleteOne({ _id: req.params.id });
     res.status(204).send();
@@ -254,64 +204,40 @@ router.delete("/Contact/:id", async (req, res) => {
   }
 });
 
-/*
-//User
+// Define the validation schema for a new Signup user
 
-router.get("/User", async (req, res) => {
-  const user = await User.find();
-  res.send(user);
+const signupSchema = Joi.object().keys({
+  fName: Joi.string().min(3).required(),
+  lName: Joi.string().min(3).required(),
+  email: Joi.string().email().min(5).required(),
+  password: Joi.string()
+    .min(8)
+    .max(30)
+    .regex(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/)
+    .required(),
 });
 
-router.post("/User", async (req, res) => {
-  const user = new User({
+routes.post("/signup", async (req, res) => {
+  const { error } = signupSchema.validate(req.body);
+
+  if (error) {
+    res.status(400).send({ error: error.details[0].message });
+    return;
+  }
+
+  const signup = new Signup({
+    fName: req.body.fName,
+    lName: req.body.lName,
     email: req.body.email,
     password: req.body.password,
   });
-  await user.save();
-  res.send(user);
+  await signup.save();
+  res.send(signup);
 });
 
-//hashing my password
+//Add new user
 
-router.patch("/User/:id", async (req, res) => {
-  try {
-    const user = await User.findOne({ _id: req.params.id });
-
-    if (req.body.email) {
-      user.email = req.body.email;
-    }
-
-    if (req.body.password) {
-      user.password = req.body.password;
-    }
-
-    await user.save();
-    res.send(user);
-  } catch {
-    res.status(404);
-    res.send({ error: "update doesn't exist!" });
-  }
-});
-
-router.delete("/User/:id", async (req, res) => {
-  try {
-    await User.deleteOne({ _id: req.params.id });
-    res.status(204).send();
-  } catch {
-    res.status(404);
-    res.send({ error: " not One!" });
-  }
-});
-
-//Sign up
-//GET "/Sigup": This endpoint returns a list of all the user data in the database
-router.get("/Sign", async (req, res) => {
-  const sign = await Sign.find();
-  res.send(sign);
-});*/
-
-
-router.post("/Signup", async (req, res) => {
+routes.post("/Signup", async (req, res) => {
   try {
     const { fName, lName, email, password } = req.body;
     //hash password
@@ -324,13 +250,16 @@ router.post("/Signup", async (req, res) => {
     });
 
     const token = jwt.sign({ id: user._id }, "remember");
-    res.json({ message: "Signup Succeful" });
+    console.log("Generated token:", token);
+    res.json({ message: "Signup Successful", token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-router.post("/login", async (req, res) => {
+//Access web site!
+
+routes.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -344,6 +273,81 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Create a comment
 
+routes.post("/comments", async (req, res) => {
+  const comment = new Comment({
+    userId: req.body.userId,
+    comment: req.body.comment,
+    postId: req.body.postId,
+    likes: req.body.likes || [],
+  });
+  await comment.save();
+  res.send(comment);
+});
 
-module.exports = router;
+// Read all comments
+routes.get("/comments", async (req, res) => {
+  const comments = await Comment.find();
+  res.send(comments);
+});
+
+//Read all comments specific to a blog
+
+routes.get("/comments/post/:postId", async (req, res) => {
+  const comments = await Comment.find({ postId: req.params.postId });
+  res.send(comments);
+});
+
+// Read a specific comment by id
+routes.get("/comments/:id", async (req, res) => {
+  const comment = await Comment.findById(req.params.id);
+  res.send(comment);
+});
+
+// Update a specific comment by id
+routes.patch("/comments/:id", async (req, res) => {
+  const comment = await Comment.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+  });
+  res.send(comment);
+});
+
+// Delete a specific comment by id
+routes.delete("/comments/:id", async (req, res) => {
+  const comment = await Comment.findByIdAndDelete(req.params.id);
+  res.send(comment);
+});
+
+// Add a like to a specific comment
+routes.patch("/comments/:id/like", async (req, res) => {
+  const { userId, commentId } = req.body;
+
+  // Find the comment
+  const comment = await Comment.findById(commentId);
+  if (!comment) return res.status(404).send("Comment not found");
+
+  // Check if the user has already liked the comment
+  if (comment.likes.includes(userId))
+    return res.status(400).send("You have already liked this comment");
+
+  // Add the user's like to the comment
+  comment.likes.push(userId);
+  await comment.save();
+  res.send(comment);
+});
+
+// Remove a like from a specific comment
+routes.patch("/comments/:id/unlike", async (req, res) => {
+  const comment = await Comment.findById(req.params.id);
+  const index = comment.likes.indexOf(req.body.userId);
+  if (index > -1) {
+    comment.likes.splice(index, 1);
+    await comment.save();
+    res.send(comment);
+  } else {
+    res.status(400).send({ error: "User has not liked this comment" });
+  }
+});
+
+module.exports = routes;
