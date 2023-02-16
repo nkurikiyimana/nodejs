@@ -1,0 +1,89 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Blog API"
+basePath: "/api/v1"
+schemes:
+  - "http"
+  - "https"
+paths:
+  /posts:
+    get:
+      summary: "Get all posts"
+      responses:
+        200:
+          description: "OK"
+    post:
+      summary: "Create a new post"
+      parameters:
+        - in: body
+          name: body
+          description: "Post object"
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              image:
+                type: string
+              content:
+                type: string
+      responses:
+        200:
+          description: "OK"
+  /posts/{id}:
+    get:
+      summary: "Get a post by ID"
+      parameters:
+        - in: path
+          name: id
+          description: "Post ID"
+          required: true
+          type: string
+      responses:
+        200:
+          description: "OK"
+        404:
+          description: "Post doesn't exist"
+    patch:
+      summary: "Update a post"
+      parameters:
+        - in: path
+          name: id
+          description: "Post ID"
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: "Post object"
+          required: true
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+              image:
+                type: string
+              content:
+                type: string
+      responses:
+        200:
+          description: "OK"
+        404:
+          description: "Post doesn't exist"
+    delete:
+      summary: "Delete a post"
+      parameters:
+        - in: path
+          name: id
+          description: "Post ID"
+          required: true
+          type: string
+      responses:
+        204:
+          description: "No content"
+        404:
+          description: "Post doesn't exist"
+
+ 

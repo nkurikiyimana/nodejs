@@ -10,11 +10,11 @@ const Signup = require("./models/Signup");
 const login = require("./login");
 
 const Comment = require("./models/comment");
-//const Like = require("./models/like");
+const Like = require("./models/like");
 const routes = express();
 
 const Joi = require("@hapi/joi");
-
+/*
 //protect my end user
 routes.use(async (req, res, next) => {
   try {
@@ -28,6 +28,7 @@ routes.use(async (req, res, next) => {
     res.status(401).json({ error: "Unauthorized" });
   }
 });
+*/
 
 // Define the validation schema for a new post
 const postSchema = Joi.object({
@@ -52,37 +53,174 @@ routes.post("/posts", async (req, res) => {
   await post.save();
   res.send(post);
 });
-//acess token
 
+//acess Swagger Documentation
+
+
+/**
+ * @swagger
+ *  components:
+ *      securitySchemes:
+ *          bearerAuth:
+ *              type: http
+ *              scheme: bearer
+ *              bearerFormat: JWT
+ *      schemas:
+ *          Post:
+ *              type: object
+ *              properties:
+ *                  _id:
+ *                      type: string
+ *                  title:
+ *                      type: string
+ *                  img:
+ *                      type: string
+ *                  content:
+ *                      type: string   
+ *                  likes:
+ *                      type: array
+ *                  comments:
+ *                      type: array
+ */
+
+
+/**
+ * @swagger
+ * /api/posts:
+ *  get:
+ *      summary: To get all blogs from mongoDB
+ *      description: This api is used to fetch all blog data from mongoDB
+ *      responses:
+ *          200:
+ *              description: This api is used to fetch all blog data from mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Post'
+ */
 //Get all post
 routes.get("/posts", async (req, res) => {
-  const posts = await Post.find();
-  res.send(posts);
+  const posts = await Post.find().populate("comments").populate("likes");
+  res.status(200).json(posts);
 });
+//Swagger documentation post
+
+/**
+ * @swagger
+ * /api/posts:
+ *  post:
+ *      summary: To add blog in mongoDB
+ *      description: This api is used to add blog in mongoDB
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#components/schemas/Post'
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: This api is used to add blog in mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Post'
+ */
+
 
 routes.post("/posts", async (req, res) => {
-  const adminid = req.id;
-  console.log(adminid);
-  const post = new Post({
-    title: req.body.title,
-    image: req.body.image,
-    content: req.body.content,
-  });
-  await post.save();
-  res.send(post);
+  try {
+    const post = new Post({
+      title: req.body.title,
+      image: req.body.image,
+      content: req.body.content,
+    });
+    await post.save();
+    res.status(200).json(post);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error saving post to database" });
+  }
 });
+
+//swagger documentation Get by Id
+
+
+/**
+ * @swagger
+ * /api/posts/{id}:
+ *  get:
+ *      summary: To get blog of specified id from mongoDB
+ *      description: This api is used to fetch blog data of specified id from mongoDB
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: Numeric ID required
+ *      responses:
+ *          200:
+ *              description: This api is used to fetch blog data of specified id from mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Post'
+ */
+
+
 
 // grab individual post
 
+
 routes.get("/posts/:id", async (req, res) => {
   try {
-    const post = await Post.findOne({ _id: req.params.id });
-    res.send(post);
+    const post = await Post.findById(req.params.id);
+    res.status(200).json(post);
   } catch {
     res.status(404);
     res.send({ error: "Post doesn't exist!" });
   }
 });
+
+//Swagger documentation
+
+/**
+ * @swagger
+ * /api/posts/{id}:
+ *  patch:
+ *      summary: To update blog of specified id in mongoDB
+ *      description: This api is used to update blog data of specified id in mongoDB
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: AlphaNumeric ID required
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#components/schemas/Blog'
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: This api is used to update blog data of specified id in mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Post'
+ */
+
+
 
 routes.patch("/posts/:id", async (req, res) => {
   try {
@@ -108,13 +246,32 @@ routes.patch("/posts/:id", async (req, res) => {
   }
 });
 
+//swagger Delete Documentation
+
+/**
+ * @swagger
+ * /api/posts/{id}:
+ *  delete:
+ *      summary: To delete blog of specified id from mongoDB
+ *      description: This api is used to delete blog of specified id from mongoDB
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: Numeric ID required
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: blog deleted successfully
+ */
+
 routes.delete("/posts/:id", async (req, res) => {
   try {
     await Post.deleteOne({ _id: req.params.id });
     res.status(204).send();
   } catch {
-    res.status(404);
-    res.send({ error: "Post doesn't exist!" });
+    res.status(404).json({message: "Post doesn't exist!" });
   }
 });
 
@@ -275,27 +432,25 @@ routes.post("/login", async (req, res) => {
 
 // Create a comment
 
+// Create a comment
 routes.post("/comments", async (req, res) => {
-  const comment = new Comment({
-    userId: req.body.userId,
-    comment: req.body.comment,
-    postId: req.body.postId,
-    likes: req.body.likes || [],
+  await Post.findByIdAndUpdate(req.params.id, {
+    $push: { comments: req.body.comment },
   });
-  await comment.save();
-  res.send(comment);
+  res.status(200).json({ message: "comment Added Successful" });
 });
 
 // Read all comments
 routes.get("/comments", async (req, res) => {
-  const comments = await Comment.find();
+  const comments = await Comment.find().sort({ created: -1 });
   res.send(comments);
 });
 
-//Read all comments specific to a blog
-
+// Read all comments specific to a blog
 routes.get("/comments/post/:postId", async (req, res) => {
-  const comments = await Comment.find({ postId: req.params.postId });
+  const comments = await Comment.find({ postId: req.params.postId }).sort({
+    created: -1,
+  });
   res.send(comments);
 });
 
@@ -309,7 +464,8 @@ routes.get("/comments/:id", async (req, res) => {
 routes.patch("/comments/:id", async (req, res) => {
   const comment = await Comment.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
-  });
+  });nodemon
+
   res.send(comment);
 });
 
@@ -320,33 +476,33 @@ routes.delete("/comments/:id", async (req, res) => {
 });
 
 // Add a like to a specific comment
-routes.patch("/comments/:id/like", async (req, res) => {
-  const { userId, commentId } = req.body;
+routes.post("/Like/:id", async (req, res) => {
+  const userid = tokenid;
+  try {
+    await Post.findByIdAndUpdate(req.params.id, {
+      $addToSet: { likes: userid },
+    });
 
-  // Find the comment
-  const comment = await Comment.findById(commentId);
-  if (!comment) return res.status(404).send("Comment not found");
-
-  // Check if the user has already liked the comment
-  if (comment.likes.includes(userId))
-    return res.status(400).send("You have already liked this comment");
-
-  // Add the user's like to the comment
-  comment.likes.push(userId);
-  await comment.save();
-  res.send(comment);
+    res.status(200).json({ message: "Like Added!" });
+  } catch (error) {
+    res.status(500).json({ message: "something went wrong" });
+  }
 });
 
-// Remove a like from a specific comment
-routes.patch("/comments/:id/unlike", async (req, res) => {
-  const comment = await Comment.findById(req.params.id);
-  const index = comment.likes.indexOf(req.body.userId);
-  if (index > -1) {
-    comment.likes.splice(index, 1);
-    await comment.save();
-    res.send(comment);
+const request = require('request');
+
+const url = 'https://jsonplaceholder.typicode.com/posts';
+
+request(url, function(error, response, body) {
+  if (error) {
+    console.error('Error:', error);
+  } else if (response.statusCode !== 200) {
+    console.error('Invalid status code:', response.statusCode);
   } else {
-    res.status(400).send({ error: "User has not liked this comment" });
+    const posts = JSON.parse(body);
+    for (let i = 0; i < posts.length; i++) {
+      console.log(`Post ${i}: ${posts[i].title}`);
+    }
   }
 });
 

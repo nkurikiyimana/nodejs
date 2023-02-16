@@ -1,11 +1,16 @@
 
+const { object } = require("@hapi/joi");
 const mongoose = require("mongoose");
 
-const schema = mongoose.Schema({
+const postSchema = new mongoose.Schema({
   title: String,
-image: String,
-content: String
-
+  image: String,
+  content: String,
+  comments: {type: [String],default:[]},
+  likes: {type: [String],default:[]}
 });
 
-module.exports = mongoose.model("Post", schema);
+const Post = mongoose.model('Post', postSchema);
+
+module.exports = Post;
+

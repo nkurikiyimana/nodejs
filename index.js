@@ -1,4 +1,7 @@
 const express = require("express");
+const cors = require("cors");
+const swaggerJsDoc = require("swagger-jsdoc");
+const swaggerUI = require("swagger-ui-express");
 const mongoose = require("mongoose"); // new
 const routes = require("./routes");
 mongoose.set("strictQuery", true);
@@ -9,6 +12,31 @@ mongoose.connect(
 );
 
 const app = express();
+
+const options ={
+  definition:{
+    openapi:"3.0.0",
+    info:{
+        title:"portfolio API",
+        version:"1.0.0",
+        description:"express portfolio API"
+    },
+    servers:[
+        {
+            url:"http://localhost:3000"
+        }
+    ],
+},
+
+
+apis: ["./routes.js"]
+}
+
+const specs = swaggerJsDoc(options)
+app.use("/api-docs",swaggerUI.serve, swaggerUI.setup(specs))
+
+
+app.use(cors())
 app.use(express.json());
 app.use("/api", routes);
 
@@ -17,3 +45,6 @@ app.use("/api", routes);
 app.listen(3000, () => {
   console.log("Server has started!");
 });
+
+
+module.exports= app;
