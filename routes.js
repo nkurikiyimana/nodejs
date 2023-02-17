@@ -88,11 +88,11 @@ routes.post("/posts", async (req, res) => {
  * @swagger
  * /api/posts:
  *  get:
- *      summary: To get all blogs from mongoDB
- *      description: This api is used to fetch all blog data from mongoDB
+ *      summary: To get all Blog Posts from From Mongodb
+ *      description: This api is used to fetch all blog posts data from mongodb
  *      responses:
  *          200:
- *              description: This api is used to fetch all blog data from mongoDB
+ *              description: This api is used to fetch all blog post data from mongodb
  *              content:
  *                  application/json:
  *                      schema:
@@ -111,8 +111,8 @@ routes.get("/posts", async (req, res) => {
  * @swagger
  * /api/posts:
  *  post:
- *      summary: To add blog in mongoDB
- *      description: This api is used to add blog in mongoDB
+ *      summary:  adding blog Posts in mongodb
+ *      description: This api is used to add blog post in mongodb
  *      requestBody:
  *          required: true
  *          content:
@@ -123,7 +123,7 @@ routes.get("/posts", async (req, res) => {
  *          - bearerAuth: []
  *      responses:
  *          200:
- *              description: This api is used to add blog in mongoDB
+ *              description: This api is used to add blog POst in mongodb
  *              content:
  *                  application/json:
  *                      schema:
@@ -155,8 +155,8 @@ routes.post("/posts", async (req, res) => {
  * @swagger
  * /api/posts/{id}:
  *  get:
- *      summary: To get blog of specified id from mongoDB
- *      description: This api is used to fetch blog data of specified id from mongoDB
+ *      summary: To get Specific blog Post by id from mongodb
+ *      description: This api is used to fetch blog post Data  of specified id from mongodb
  *      parameters:
  *          - in: path
  *            name: id
@@ -164,7 +164,7 @@ routes.post("/posts", async (req, res) => {
  *            description: Numeric ID required
  *      responses:
  *          200:
- *              description: This api is used to fetch blog data of specified id from mongoDB
+ *              description: This api is used to fetch blog data of specified id from mongodb
  *              content:
  *                  application/json:
  *                      schema:
@@ -194,8 +194,8 @@ routes.get("/posts/:id", async (req, res) => {
  * @swagger
  * /api/posts/{id}:
  *  patch:
- *      summary: To update blog of specified id in mongoDB
- *      description: This api is used to update blog data of specified id in mongoDB
+ *      summary: updating a blog Posts of specified id in mongodb
+ *      description: This api is used for updating a blog Posts of specified id in mongodb
  *      parameters:
  *          - in: path
  *            name: id
@@ -206,12 +206,12 @@ routes.get("/posts/:id", async (req, res) => {
  *          content:
  *              application/json:
  *                  schema:
- *                      $ref: '#components/schemas/Blog'
+ *                      $ref: '#components/schemas/Post'
  *      security:
  *          - bearerAuth: []
  *      responses:
  *          200:
- *              description: This api is used to update blog data of specified id in mongoDB
+ *              description: This api is used for updating a blog Posts of specified id in mongodb
  *              content:
  *                  application/json:
  *                      schema:
@@ -252,8 +252,8 @@ routes.patch("/posts/:id", async (req, res) => {
  * @swagger
  * /api/posts/{id}:
  *  delete:
- *      summary: To delete blog of specified id from mongoDB
- *      description: This api is used to delete blog of specified id from mongoDB
+ *      summary: deletins blog Posts of specified id from mongodb
+ *      description: This api is used to delete blog post of specified id from mongoDB
  *      parameters:
  *          - in: path
  *            name: id
@@ -300,12 +300,83 @@ routes.post("/contact", async (req, res) => {
   res.send(contact);
 });
 
+//swagger documentation
+
+/**
+ * @swagger
+ *  components:
+ *      securitySchemes:
+ *          bearerAuth:
+ *              type: http
+ *              scheme: bearer
+ *              bearerFormat: JWT
+ *      schemas:
+ *          Contact:
+ *              type: object
+ *              properties:
+ *                  _id:
+ *                      type: string
+ *                  name:
+ *                      type: string
+ *                  email:
+ *                      type: string
+ *                  message:
+ *                      type: string   
+ *                 
+ */
+
 //contact
+
+//Swagger documentation Get all contact
+/**
+ * @swagger
+ * /api/Contact:
+ *  get:
+ *      summary:  geting all Contact message from mongoDB
+ *      description: This api is used to fetch all Contact message data from mongoDB
+ *      responses:
+ *          200:
+ *              description: This api is used to fetch all Contact message data from mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Contact'
+ */
 
 routes.get("/Contact", async (req, res) => {
   const contact = await Contact.find();
   res.send(contact);
 });
+//swagger documentation
+
+/**
+ * @swagger
+ * /api/Contact:
+ *  post:
+ *      summary: adding Contact message in mongoDB
+ *      description: This api is used to add Contact message in mongoDB
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#components/schemas/Contact'
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: This api is used to add Contact message in mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Contact'
+ */
+
+
 
 routes.post("/Contact", async (req, res) => {
   const contact = new Contact({
@@ -317,6 +388,35 @@ routes.post("/Contact", async (req, res) => {
   res.send(contact);
 });
 
+//Swagger documentation Get contact by Id
+
+
+
+/**
+ * @swagger
+ * /api/Contact/{id}:
+ *  get:
+ *      summary: To get blog of specified id from mongoDB
+ *      description: This api is used to fetch Contact message data of specified id from mongoDB
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: Numeric ID required
+ *      responses:
+ *          200:
+ *              description: This api is used to fetch Contact message data of specified id from mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Contact'
+ */
+
+
+
+
 routes.get("/Contact/:id", async (req, res) => {
   try {
     const contact = await Contact.findOne({ _id: req.params.id });
@@ -326,6 +426,43 @@ routes.get("/Contact/:id", async (req, res) => {
     res.send({ error: "Message doesn't exist!" });
   }
 });
+
+// Swagger Documentation Update contact
+
+
+/**
+ * @swagger
+ * /api/Contact/{id}:
+ *  patch:
+ *      summary: updating Contact message of specified id in mongoDB
+ *      description: This api is used to update Contact message data of specified id in mongoDB
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: AlphaNumeric ID required
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#components/schemas/Contact'
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: This api is used to update blog data of specified id in mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Contact'
+ */
+
+
+
+
 
 routes.patch("/Contact/:id", async (req, res) => {
   try {
@@ -350,6 +487,28 @@ routes.patch("/Contact/:id", async (req, res) => {
     res.send({ error: "update doesn't exist!" });
   }
 });
+
+//Swagger Documentation Delete Contact
+
+
+/**
+ * @swagger
+ * /api/Contact/{id}:
+ *  delete:
+ *      summary: deleting Contact message of specified id from mongoDB
+ *      description: This api is used to delete Contact message of specified id from mongoDB
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: Numeric ID required
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: blog deleted successfully
+ */
+
 
 routes.delete("/Contact/:id", async (req, res) => {
   try {
@@ -394,6 +553,63 @@ routes.post("/signup", async (req, res) => {
 
 //Add new user
 
+//Swagger documentation Schma Signup
+
+
+/**
+ * @swagger
+ *  components:
+ *      securitySchemes:
+ *          bearerAuth:
+ *              type: http
+ *              scheme: bearer
+ *              bearerFormat: JWT
+ *      schemas:
+ *          Signup:
+ *              type: object
+ *              properties:
+ *                  _id:
+ *                      type: string
+ *                  fName:
+ *                      type: string
+ *                  lName:
+ *                      type: string
+ *                  email:
+ *                      type: string   
+ *                  password:
+ *                      type: String
+ *                 
+ */
+
+
+//Swagger Documentation Signup Add new user
+
+/**
+ * @swagger
+ * /api/Signup:
+ *  post:
+ *      summary: Adding new user
+ *      description: This api is used to add New user
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#components/schemas/Signup'
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: This api is used to add blog in mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Signup'
+ */
+
+
 routes.post("/Signup", async (req, res) => {
   try {
     const { fName, lName, email, password } = req.body;
@@ -414,7 +630,56 @@ routes.post("/Signup", async (req, res) => {
   }
 });
 
-//Access web site!
+// Login for Accessing new user!
+
+/**
+ * @swagger
+ *  components:
+ *      securitySchemes:
+ *          bearerAuth:
+ *              type: http
+ *              scheme: bearer
+ *              bearerFormat: JWT
+ *      schemas:
+ *         login:
+ *              type: object
+ *              properties:
+ *                email:
+ *                      type: string  
+ *                password:
+ *                      type: String
+ *                 
+ */
+
+
+//Swagger Documentation Sigin ew user
+
+/**
+ * @swagger
+ * /api/login:
+ *  post:
+ *      summary:  user login
+ *      description: This api is used by new user
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#components/schemas/login'
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: This api is used to add blog in mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/login'
+ */
+
+
 
 routes.post("/login", async (req, res) => {
   try {

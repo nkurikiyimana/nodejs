@@ -1,4 +1,4 @@
-let chai = require('chai');
+let chai = require("chai");
 let chaiHttp = require("chai-http");
 let server = require("../index");
 
@@ -6,17 +6,34 @@ let server = require("../index");
 chai.should();
 chai.use(chaiHttp);
 
-describe('a suite of 7 seconds', function () {
-  this.timeout(1500);
-  it('should take less than 40s', function (done) {
-    setTimeout(done, 1000);
+describe("Contact API", () => {
+  /**
+   * Test the GET messages route
+   */
+  describe("GET /api/Posts", () => {
+    it("it should GET all the Blogs", (done) => {
+      chai
+        .request(server)
+        .get("/api/Posts")
+        .end((err, response) => {
+          response.should.have.status(200);
+        });
+      done();
+    });
+    it("it should NOT GET all the messages", (done) => {
+      chai
+        .request(server)
+        .get("/api/Post")
+        .end((err, response) => {
+          response.should.have.status(404);
+        });
+
+      done();
+    });
   });
+});
 
-  it('should take less than 12s as well', function (done) {
-    setTimeout(done, 500);
-  });
-
-
+/*
 describe('post/api', () => {
   // Test get Routes
   it('it should GET all the posts', (done) => {
@@ -96,22 +113,4 @@ describe('post/api', () => {
     });
   });
 });
-
-
-});
-const request = require('request');
-
-const url = 'https://jsonplaceholder.typicode.com/posts';
-
-request(url, function(error, response, body) {
-  if (error) {
-    console.error('Error:', error);
-  } else if (response.statusCode !== 200) {
-    console.error('Invalid status code:', response.statusCode);
-  } else {
-    const posts = JSON.parse(body);
-    for (let i = 0; i < posts.length; i++) {
-      console.log(`Post ${i}: ${posts[i].title}`);
-    }
-  }
-});
+*/
