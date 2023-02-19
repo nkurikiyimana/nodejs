@@ -1,16 +1,15 @@
 const express = require("express");
 const Post = require("./models/Post");
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const admin = require("./middleware/AdminAuth");
+const bcrypt = require("bcryptjs");
 //const Com = require("./models/comment");
 const Contact = require("./models/Contact");
 //const User = require("./models/User");
 const Signup = require("./models/Signup");
-const login = require("./login");
+const login = require("./models/login");
 
 const Comment = require("./models/comment");
-const Like = require("./models/like");
 const routes = express();
 
 const Joi = require("@hapi/joi");
@@ -141,12 +140,14 @@ routes.post("/posts", async (req, res) => {
       content: req.body.content,
     });
     await post.save();
-    res.status(200).json(post);
+    res.status(201).json(post); // Change status code to 201
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error saving post to database" });
   }
 });
+
+
 
 //swagger documentation Get by Id
 
@@ -614,7 +615,7 @@ routes.post("/Signup", async (req, res) => {
   try {
     const { fName, lName, email, password } = req.body;
     //hash password
-    const hashedpassword = await bcrypt.hash(password, 10);
+    const hashedpassword = await bcrypt.hash(password, 12);
     const user = await Signup.create({
       fName,
       lName,
@@ -623,8 +624,7 @@ routes.post("/Signup", async (req, res) => {
     });
 
     const token = jwt.sign({ id: user._id }, "remember");
-    console.log("Generated token:", token);
-    res.json({ message: "Signup Successful", token });
+    res.status(200).json({ message: "Signup Successful", token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -685,7 +685,7 @@ routes.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await Signup.findOne({ email });
+    const user = await login.findOne({ email });
     const ismuch = await bcrypt.compare(password, user.password);
     if (!ismuch) res.status(400).json({ message: "paassword is not correct!" });
     const token = jwt.sign({ id: user._id }, "remember");
@@ -698,7 +698,8 @@ routes.post("/login", async (req, res) => {
 // Create a comment
 
 // Create a comment
-routes.post("/comments", async (req, res) => {
+routes.post("/comments/:id", async (req, res) => {
+  console.log(req.params.id);
   await Post.findByIdAndUpdate(req.params.id, {
     $push: { comments: req.body.comment },
   });
@@ -741,8 +742,10 @@ routes.delete("/comments/:id", async (req, res) => {
 });
 
 // Add a like to a specific comment
-routes.post("/Like/:id", async (req, res) => {
-  const userid = tokenid;
+routes.post("/Like/:id",admin, async (req, res) => {
+  console.log(req.params.id)
+  const userid = req.id;
+  console.log(req.id)
   try {
     await Post.findByIdAndUpdate(req.params.id, {
       $addToSet: { likes: userid },
@@ -754,21 +757,6 @@ routes.post("/Like/:id", async (req, res) => {
   }
 });
 
-const request = require('request');
 
-const url = 'https://jsonplaceholder.typicode.com/posts';
-
-request(url, function(error, response, body) {
-  if (error) {
-    console.error('Error:', error);
-  } else if (response.statusCode !== 200) {
-    console.error('Invalid status code:', response.statusCode);
-  } else {
-    const posts = JSON.parse(body);
-    for (let i = 0; i < posts.length; i++) {
-      console.log(`Post ${i}: ${posts[i].title}`);
-    }
-  }
-});
 
 module.exports = routes;

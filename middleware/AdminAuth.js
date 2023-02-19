@@ -1,4 +1,4 @@
-/*
+
 const jwt = require("jsonwebtoken");
 const admin = async(req, res , next)=>{
   if (!req.headers.authorization) {
@@ -8,8 +8,8 @@ const admin = async(req, res , next)=>{
   let data = jwt.verify(Token,"remember" )
   req.id = data.id
   next()
-} */
-
+} 
+/*
 const jwt = require("jsonwebtoken");
 function authToken(req, res, next){
   const auth = req.headers["authorisation"]
@@ -21,5 +21,5 @@ function authToken(req, res, next){
   next()
 })
 }  
-
-module.exports= authToken
+*/
+module.exports= admin

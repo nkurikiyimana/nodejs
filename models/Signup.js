@@ -4,7 +4,7 @@ const schema = mongoose.Schema({
   fName: String,
   lName: String,
   email: String,
-  password: String,
+  password: String
 });
 
 
