@@ -685,9 +685,9 @@ routes.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await login.findOne({ email });
+    const user = await Signup.findOne({ email });
     const ismuch = await bcrypt.compare(password, user.password);
-    if (!ismuch) res.status(400).json({ message: "paassword is not correct!" });
+    if (!ismuch) res.status(200).json({ message: "Login Succeful!" });
     const token = jwt.sign({ id: user._id }, "remember");
     res.status(200).json({ token, user });
   } catch (error) {
@@ -718,9 +718,9 @@ routes.post("/login", async (req, res) => {
 
 /**
  * @swagger
- * /api/comment/{id}:
+ * /api/Comments/{id}:
  *  post:
- *      summary: To add comment in mongoDB
+ *      summary: adding comments to the Specified Blog in mongoDB
  *      description: This api is used to add comment data in mongoDB
  *      parameters:
  *          - in: path
@@ -743,7 +743,7 @@ routes.post("/login", async (req, res) => {
  *                      schema:
  *                          type: array
  *                          items:
- *                              $ref: '#components/schemas/Comment'
+ *                              $ref: '#components/schemas/comment'
  */
 
 //Swagger Documentation Comments
