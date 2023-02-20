@@ -386,7 +386,7 @@ routes.post("/Contact", async (req, res) => {
     message: req.body.message,
   });
   await contact.save();
-  res.send(contact);
+  res.status(200).json(contact);
 });
 
 //Swagger documentation Get contact by Id
@@ -421,7 +421,7 @@ routes.post("/Contact", async (req, res) => {
 routes.get("/Contact/:id", async (req, res) => {
   try {
     const contact = await Contact.findOne({ _id: req.params.id });
-    res.send(contact);
+    res.status(200).send(contact)
   } catch {
     res.status(404);
     res.send({ error: "Message doesn't exist!" });
@@ -482,7 +482,7 @@ routes.patch("/Contact/:id", async (req, res) => {
     }
 
     await contact.save();
-    res.send(contact);
+    res.status(200).json("Contact uptated successful");
   } catch {
     res.status(404);
     res.send({ error: "update doesn't exist!" });
@@ -514,7 +514,7 @@ routes.patch("/Contact/:id", async (req, res) => {
 routes.delete("/Contact/:id", async (req, res) => {
   try {
     await Contact.deleteOne({ _id: req.params.id });
-    res.status(204).send();
+    res.status(204).json("Querry message Deleted Successful");
   } catch {
     res.status(404);
     res.send({ error: " Done!" });
@@ -696,6 +696,57 @@ routes.post("/login", async (req, res) => {
 });
 
 // Create a comment
+//Swagger documentation Schma Comments
+
+
+/* @swagger
+* /api/Like/{id}:
+*  post:
+*      summary: To add like on blog of specified id in mongodb
+*      description: This api is used to add like on blog of specified id in mongodb
+*      parameters:
+*          - in: path
+*            name: id
+*            required: true
+*            description: AlphaNumeric ID required
+*      security:
+*          - bearerAuth: []
+*      responses:
+*          200:
+*              description: Blog has been liked!
+ */
+
+/**
+ * @swagger
+ * /api/comment/{id}:
+ *  post:
+ *      summary: To add comment in mongoDB
+ *      description: This api is used to add comment data in mongoDB
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: AlphaNumeric ID required
+ *      security:
+ *          - bearerAuth: []
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: '#components/schemas/comment'
+ *      responses:
+ *          200:
+ *              description: This api is used to add comment data in mongoDB
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          type: array
+ *                          items:
+ *                              $ref: '#components/schemas/Comment'
+ */
+
+//Swagger Documentation Comments
 
 // Create a comment
 routes.post("/comments/:id", async (req, res) => {
@@ -706,43 +757,29 @@ routes.post("/comments/:id", async (req, res) => {
   res.status(200).json({ message: "comment Added Successful" });
 });
 
-// Read all comments
-routes.get("/comments", async (req, res) => {
-  const comments = await Comment.find().sort({ created: -1 });
-  res.send(comments);
-});
 
-// Read all comments specific to a blog
-routes.get("/comments/post/:postId", async (req, res) => {
-  const comments = await Comment.find({ postId: req.params.postId }).sort({
-    created: -1,
-  });
-  res.send(comments);
-});
 
-// Read a specific comment by id
-routes.get("/comments/:id", async (req, res) => {
-  const comment = await Comment.findById(req.params.id);
-  res.send(comment);
-});
+//Swagger documentation Schma Like
 
-// Update a specific comment by id
-routes.patch("/comments/:id", async (req, res) => {
-  const comment = await Comment.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });nodemon
+/**
+ * @swagger
+ * /api/Like/{id}:
+ *  post:
+ *      summary: commenting blog post of specified id from mongoDB
+ *      description: This api is used to  of specified id from mongoDB
+ *      parameters:
+ *          - in: path
+ *            name: id
+ *            required: true
+ *            description: Numeric ID required
+ *      security:
+ *          - bearerAuth: []
+ *      responses:
+ *          200:
+ *              description: Comments blog Added successfully
+ */
 
-  res.send(comment);
-});
-
-// Delete a specific comment by id
-routes.delete("/comments/:id", async (req, res) => {
-  const comment = await Comment.findByIdAndDelete(req.params.id);
-  res.send(comment);
-});
-
-// Add a like to a specific comment
-routes.post("/Like/:id",admin, async (req, res) => {
+routes.post("/Like/:id", async (req, res) => {
   console.log(req.params.id)
   const userid = req.id;
   console.log(req.id)
