@@ -13,9 +13,9 @@ const Comment = require("./models/comment");
 const routes = express();
 
 const Joi = require("@hapi/joi");
-/*
+
 //protect my end user
-routes.use(async (req, res, next) => {
+/*routes.use(async (req, res, next) => {
   try {
     const token = req.header("Authorization").replace("Bearer ", "");
     const decoded = jwt.verify(token, "remember");
@@ -26,8 +26,8 @@ routes.use(async (req, res, next) => {
   } catch (error) {
     res.status(401).json({ error: "Unauthorized" });
   }
-});
-*/
+});*/
+
 
 // Define the validation schema for a new post
 const postSchema = Joi.object({
